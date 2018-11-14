@@ -12,17 +12,17 @@ u_search = '/citations?hl=en&view_op=search_authors&mauthors={}'
 
 # gsc_prf_il for getting the domains of the author
 
-f = open('authors.csv','r')
+f = open('authors_mpr.csv','r')
 lines = f.readlines()
 with open('authors_index.csv','w') as op:
     op.write("name, h_index, h_2013, i10, i10_2013, domains\n")
     for i in xrange(len(lines)):
         author = lines[i]
+        author = author.strip("\n\r")
         # print author
-        author = author.strip("\n")
         write_row = ""
-        write_row += author+","
         auth = author.strip().split(" ")
+        write_row += author+","
         auth = "+".join(auth)
         # print auth
         url = u_base + u_search.format(auth)
@@ -32,10 +32,13 @@ with open('authors_index.csv','w') as op:
             print author, response.reason
             break
         soup = BS(response.content)
-        href = "take the first link"
+        href = ""
         for text in soup.findAll(attrs={'class': 'gsc_oai_name'}):
             for links in text.findAll('a'):
                 href = links.get('href')
+        if href == "":
+            print "not found"
+            continue
         a_url = u_base + href
         time.sleep(random.random())
         result = requests.get(a_url)
@@ -46,7 +49,13 @@ with open('authors_index.csv','w') as op:
         soup2 = BS(result.content)
 
         data = []
+        if not soup2:
+            print "no content found"
+            continue
         table = soup2.find('table', attrs={'id':'gsc_rsb_st'})
+        if not table:
+            print "content not found"
+            continue
         table_body = table.find('tbody')
 
         rows = table_body.findAll('tr')
