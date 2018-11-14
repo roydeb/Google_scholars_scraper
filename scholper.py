@@ -54,13 +54,13 @@ with open('authors_index.csv','w') as op:
             cols = row.findAll('td')
             cols = [ele.text.strip() for ele in cols]
             data.append([ele for ele in cols if ele])
-        write_row += "{},{},{},{}".format(data[1][1], data[1][2], data[2][1], data[2][2])
-        domains = ""
+        write_row += "{},{},{},{},".format(data[1][1], data[1][2], data[2][1], data[2][2])
+        domains = []
         for text in soup2.findAll(attrs={'class': 'gsc_prf_il', 'id' : 'gsc_prf_int'}):
             for link in text.findAll('a'):
-                domains += ";"+link.getText()
-        write_row += "{}\n".format(domains)
+                domains.append(link.getText())
+        write_row += "{}\n".format(";".join(domains))
         op.write(write_row)
         if i%100 == 0:
-            print "{} authors processed".format(i)
+            print "{} authors processed".format(i+1)
 f.close()
